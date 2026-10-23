@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>销售工程师备战台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="sidebar-brand">
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </span>
+        <div>
+          <p class="brand-name">SE Desk</p>
+          <p class="brand-sub">销售备战台</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-item is-active" data-view="workbench">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          </span>
+          备战工作台
+        </button>
+        <button type="button" class="nav-item" data-view="directory">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          客户名录
+        </button>
+        <button type="button" class="nav-item" data-view="history">
+          <span class="nav-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          生成历史
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span class="sidebar-version">Presales Prep</span>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <p class="breadcrumb"><span>销售运营</span> / <strong id="breadcrumb-current">备战工作台</strong></p>
+        </div>
+        <div class="topbar-right">
+          <span class="env-pill">LOCAL · WEB</span>
+          <div id="health" class="health" data-state="loading">
+            <span class="health-dot" aria-hidden="true"></span>
+            <span class="health-text">检查服务中…</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="stats-bar" aria-label="概览">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-customers">—</span>
+          <span class="stat-label">名录客户</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-active">—</span>
+          <span class="stat-label">当前档案</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-history">—</span>
+          <span class="stat-label">历史记录</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value stat-value-sm" id="stat-scene">工业</span>
+          <span class="stat-label">本场场景</span>
+        </div>
+      </div>
+
+      <main id="view-workbench" class="view view-workbench">
+        <section class="panel panel-input" aria-labelledby="input-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="input-title">输入</h2>
+              <p class="panel-desc">选行业场景 → 可选挂客户档案 → 填本场纪要 → 生成</p>
+            </div>
+          </div>
+
+          <form id="form" class="form">
+            <div class="customer-box">
+              <label class="field">客户档案
+                <select id="customer_select">
+                  <option value="">不关联档案（单次拜访）</option>
+                </select>
+              </label>
+              <div class="customer-actions">
+                <button type="button" class="btn ghost compact" id="btn-new-customer">新建客户</button>
+                <button type="button" class="btn ghost compact" id="btn-refresh-customers">刷新</button>
+              </div>
+              <div id="new-customer-form" class="new-customer-form" hidden>
+                <label class="field">客户名称（必填）
+                  <input id="new_customer_name" placeholder="例如：华南精工汽配" />
+                </label>
+                <label class="field">客户一句话 <span class="opt">可选</span>
+                  <input id="new_customer_one_liner" placeholder="行业 + 规模 + 目标" />
+                </label>
+                <label class="field">关键联系人 <span class="opt">可选</span>
+                  <input id="new_customer_contact" placeholder="如：质量王工 / IT 周工" />
+                </label>
+                <label class="field">推进阶段
+                  <select id="new_customer_stage">
+                    <option value="lead" selected>线索</option>
+                    <option value="discovery">摸底中</option>
+                    <option value="solution">方案中</option>
+                    <option value="pilot">试点中</option>
+                    <option value="won">已成单</option>
+                    <option value="lost">未成单</option>
+                    <option value="hold">暂缓</option>
+                  </select>
+                </label>
+                <label class="field">备战备注 <span class="opt">可选</span>
+                  <textarea id="new_customer_note" rows="2" placeholder="你自己的准备提醒，如：下周约试样、等采购回电"></textarea>
+                </label>
+                <div class="customer-actions">
+                  <button type="button" class="btn primary compact" id="btn-create-customer">确认创建</button>
+                  <button type="button" class="btn ghost compact" id="btn-cancel-create">取消</button>
+                </div>
+                <p id="create-customer-error" class="error" hidden></p>
+              </div>
+              <p id="customer-meta" class="customer-meta" hidden></p>
+              <details id="customer-details" class="customer-details" hidden>
+                <summary>查看 / 编辑档案与备战备注</summary>
+                <label class="field">关键联系人
+                  <input id="profile_contact" placeholder="干系人 / 对接人" />
+                </label>
+                <label class="field">推进阶段
+                  <select id="profile_stage">
+                    <option value="lead">线索</option>
+                    <option value="discovery">摸底中</option>
+                    <option value="solution">方案中</option>
+                    <option value="pilot">试点中</option>
+                    <option value="won">已成单</option>
+                    <option value="lost">未成单</option>
+                    <option value="hold">暂缓</option>
+                  </select>
+                </label>
+                <label class="field">备战备注
+                  <textarea id="profile_note" rows="2" placeholder="个人准备提醒，不注入模型也可仅作名录记录"></textarea>
+                </label>
+                <label class="field">已确认事实（每行一条）
+                  <textarea id="profile_facts" rows="4" placeholder="跨拜访累计的 stated 事实"></textarea>
+                </label>
+                <label class="field">开放缺口（每行一条）
+                  <textarea id="profile_gaps" rows="3" placeholder="下次优先验证的问题"></textarea>
+                </label>
+                <button type="button" class="btn ghost" id="btn-save-profile">保存档案字段</button>
+                <div id="visit-list" class="visit-list"></div>
+              </details>
+            </div>
+
+            <div class="field-row">
+              <label class="field">行业场景
+                <select name="scene" id="scene">
+                  <option value="vision" selected>工业 · 视觉 / 工控</option>
+                  <option value="ict">ICT · 云安 / 企软</option>
+                  <option value="chip">芯片 · FAE / 技术销售</option>
+                </select>
+              </label>
+              <label class="field">本场目标
+                <select name="meeting_goal">
+                  <option value="discovery">摸底 Discovery</option>
+                  <option value="solution" selected>方案沟通</option>
+                  <option value="pilot">逼近试点 / 推进</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field">客户一句话
+              <input name="customer_one_liner" required placeholder="行业 + 规模 + 已知目标" />
+            </label>
+
+            <label class="field">本场补充已知信息 <span class="opt">可选</span>
+              <textarea name="known_context" rows="2" placeholder="本场新得知的干系人、预算等；档案累计会自动注入"></textarea>
+            </label>
+
+            <label class="field">竞品 <span class="opt">可选</span>
+              <input name="competitors" placeholder="在谈厂商；空则用档案或对比现状" />
+            </label>
+
+            <label class="field">我方产品要点
+              <textarea name="our_product_brief" rows="4" placeholder="公开产品能力 brief；空则用档案中的"></textarea>
+            </label>
+
+            <label class="field">本场会议纪要
+              <textarea name="notes" rows="8" required placeholder="只贴这一次拜访的新内容即可"></textarea>
+            </label>
+
+            <div class="toggles">
+              <label class="toggle">
+                <input type="checkbox" name="dry_run" id="dry_run" />
+                <span>演示模式（不调模型，返回样例）</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" name="save_history" id="save_history" checked />
+                <span>写入本地历史</span>
+              </label>
+              <label class="toggle">
+                <input type="checkbox" id="record_visit" checked />
+                <span>关联档案时记录为一次拜访</span>
+              </label>
+            </div>
+
+            <div class="actions">
+              <div class="sample-group">
+                <button type="button" class="btn ghost" id="load-sample-a">样例 · 工业</button>
+                <button type="button" class="btn ghost" id="load-sample-b">样例 · ICT</button>
+              </div>
+              <button type="submit" class="btn primary" id="submit">
+                <span class="btn-label">生成 SE 草稿</span>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel panel-output" aria-labelledby="output-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="output-title">输出</h2>
+              <p class="panel-desc">七段草稿 · 可合并进档案 · 可导出</p>
+            </div>
+            <div class="out-actions">
+              <span id="mode" class="mode" hidden></span>
+              <button type="button" class="btn ghost compact" id="copy" disabled>复制</button>
+              <button type="button" class="btn ghost compact" id="download-md" disabled>下载 .md</button>
+              <button type="button" class="btn ghost compact" id="download-html" disabled>下载预览</button>
+              <button type="button" class="btn ghost compact" id="download-pdf" disabled>下载 PDF</button>
+            </div>
+          </div>
+          <div id="toast" class="toast" hidden role="status"></div>
+          <div class="view-tabs view-tabs-underline" id="view-tabs" hidden>
+            <button type="button" class="tab is-active" data-view="preview">预览</button>
+            <button type="button" class="tab" data-view="source">Markdown 源码</button>
+          </div>
+          <div class="output-shell">
+            <article id="preview" class="preview" hidden></article>
+            <pre id="output" class="output is-empty">SE 草稿将显示在这里。
+
+推荐流程：选行业场景 → 客户名录选用/新建 → 本场纪要 → 生成 → 合并事实/缺口 → 导出。</pre>
+          </div>
+          <div class="merge-box" id="merge-box" hidden>
+            <h3>合并到当前客户档案</h3>
+            <p id="merge-status" class="merge-status" hidden></p>
+            <label class="field">追加已确认事实（每行一条）
+              <textarea id="merge_facts" rows="3" placeholder="本场核实后的事实"></textarea>
+            </label>
+            <label class="field">追加开放缺口（每行一条）
+              <textarea id="merge_gaps" rows="2" placeholder="仍待下次验证的问题"></textarea>
+            </label>
+            <label class="field">关闭缺口（每行一条，须与档案中原文一致）
+              <textarea id="merge_remove_gaps" rows="2" placeholder="本场已解决的缺口"></textarea>
+            </label>
+            <button type="button" class="btn primary" id="btn-merge">
+              <span class="merge-label">合并进档案</span>
+            </button>
+          </div>
+          <p id="error" class="error" hidden></p>
+        </section>
+      </main>
+
+      <main id="view-directory" class="view view-directory" hidden>
+        <section class="panel panel-full" aria-labelledby="dir-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="dir-title">客户名录</h2>
+              <p class="panel-desc">记录备战过的客户 · 选用后回到工作台继续生成</p>
+            </div>
+            <button type="button" class="btn primary compact" id="btn-new-customer-dir">新建客户</button>
+          </div>
+          <div class="directory-toolbar">
+            <span class="search-wrap">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input id="directory-search" type="search" placeholder="搜索名称 / 联系人 / 备注" />
+            </span>
+            <button type="button" class="btn ghost compact" id="refresh-directory">刷新</button>
+          </div>
+          <p id="directory-count" class="directory-count"></p>
+          <ul id="directory-list" class="directory-list directory-list-grid"></ul>
+        </section>
+      </main>
+
+      <main id="view-history" class="view view-history" hidden>
+        <section class="panel panel-full" aria-labelledby="hist-title">
+          <div class="panel-head">
+            <div>
+              <h2 id="hist-title">生成历史</h2>
+              <p class="panel-desc">本地归档的 SE 草稿 · 点击可回填工作台</p>
+            </div>
+            <button type="button" class="btn ghost compact" id="refresh-history">刷新</button>
+          </div>
+          <ul id="history-list" class="history-list history-list-grid"></ul>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
